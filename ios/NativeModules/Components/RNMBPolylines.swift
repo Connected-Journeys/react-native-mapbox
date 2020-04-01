@@ -47,17 +47,25 @@ class RNMBPolylines {
             let properties = polyline.object(forKey: "properties") as! NSDictionary
             let id = properties.object(forKey: "id") as! String
             let jsonData = try? JSONSerialization.data(withJSONObject: polyline, options: [])
-            guard let shapeFromGeoJSON = try? MGLShape(data: jsonData!, encoding: String.Encoding.utf8.rawValue) else {
-                fatalError("Could not generate MGLShape")
+            
+            let countCoords = ((polyline.object(forKey: "geometry") as? NSDictionary)?.object(forKey: "coordinates") as? NSArray)?.count ?? 0
+            print(countCoords)
+            
+            if (countCoords>0) {
+                let shapeFromGeoJSON = try? MGLShape(data: jsonData!, encoding: String.Encoding.utf8.rawValue)
+                
+                if (shapeFromGeoJSON != nil) {
+                    if let existingSource = style.source(withIdentifier: "RNMB-shape-\(id)") as? MGLShapeSource {
+                        existingSource.shape = shapeFromGeoJSON
+                    } else {
+                        let source = MGLShapeSource(identifier: "RNMB-shape-\(id)", shape: shapeFromGeoJSON, options: nil)
+                        style.addSource(source)
+                        addLayer(id, polyline, properties, source)
+                    }
+                }
             }
             
-            if let existingSource = style.source(withIdentifier: "RNMB-shape-\(id)") as? MGLShapeSource {
-                existingSource.shape = shapeFromGeoJSON
-            } else {
-                let source = MGLShapeSource(identifier: "RNMB-shape-\(id)", shape: shapeFromGeoJSON, options: nil)
-                style.addSource(source)
-                addLayer(id, polyline, properties, source)
-            }
+            
         }
         
         // Remove layers (if removed from props)
