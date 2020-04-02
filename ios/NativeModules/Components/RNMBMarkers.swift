@@ -153,7 +153,9 @@ class RNMBMarkers{
                 let annotation = ann as! RNMBPointAnnotation
                 return annotation.id == id
             }
-            mapView.removeAnnotation(annotationToDelete!)
+            if (annotationToDelete != nil) {
+                mapView.removeAnnotation(annotationToDelete!)
+            }
         }
         self.removedIDs = []
     }
