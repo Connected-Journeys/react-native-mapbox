@@ -62,7 +62,7 @@ public class RNMBOptions {
                 if (headingIndicator == true) {
                     locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(context, style).build());
                     locationComponent.setLocationComponentEnabled(true);
-                    locationComponent.setCameraMode(CameraMode.TRACKING);
+                    locationComponent.setCameraMode(CameraMode.NONE);
                     locationComponent.setRenderMode(RenderMode.COMPASS);
                 }
             }
