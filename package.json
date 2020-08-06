@@ -1,7 +1,7 @@
 {
   "name": "react-native-mapbox",
   "title": "React Native Mapbox",
-  "version": "0.1.5-alpha-8",
+  "version": "0.1.5-alpha-9",
   "description": "MapBox wrapper for React Native around Android and IOS SDKs",
   "main": "index.js",
   "types": "index.d.ts",
