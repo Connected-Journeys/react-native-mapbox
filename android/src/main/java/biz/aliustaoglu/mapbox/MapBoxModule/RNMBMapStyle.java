@@ -34,6 +34,7 @@ public class RNMBMapStyle {
 
     public void update(MapboxMap mapboxMap, MapView mapView, Style style){
         BuildingPlugin buildingPlugin = new BuildingPlugin(mapView, mapboxMap, style);
+        buildingPlugin.setOpacity(0.05f);
         buildingPlugin.setVisibility(true);
     }
 }
