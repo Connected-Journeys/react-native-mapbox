@@ -44,7 +44,7 @@ type Options = {
    */
   showsScale: Boolean;
   /**
-   * Whether to show heading 
+   * Whether to show heading
    */
   showsHeading: Boolean;
   /**
@@ -82,6 +82,80 @@ type Pulsator = {
   duration: Number;
 }
 
+type Frame = {
+  /**
+   * x-coordinate from the image center
+   */
+  x: Number;
+
+  /**
+   * y-coordinate from the image center
+   */
+  y: Number;
+
+  /**
+   * Frame width
+   */
+  width: Number;
+
+  /**
+   * Frame height
+   */
+  height: Number
+
+}
+
+type Border = {
+  /**
+   * Border color in hex
+   */
+  color: String;
+
+  /**
+   * Border width
+   */
+  width: Number;
+
+  /**
+   * Border corner radius
+   */
+  cornerRadius: Number
+
+}
+
+type Label = {
+  /**
+   * Text of the label
+   */
+  labelText: String;
+
+  /**
+   * Text color in hex
+   */
+  color: String;
+
+  /**
+   * Text size
+   */
+  textSize: Number;
+
+  /**
+   * Label background color
+   */
+  backgroundColor: String;
+
+  /**
+   * Frame properties
+   */
+  frame: Frame;
+
+  /**
+   * Border properties
+   */
+  border: Border;
+
+}
+
 type Marker = {
   /**
    * Unique id for marker
@@ -117,7 +191,12 @@ type Marker = {
   /**
    * Pass either pulse parameters. Or just pass boolean to use it with default values
    */
-  pulsator: Pulsator | Boolean
+  pulsator: Pulsator | Boolean;
+
+  /**
+   * Label properties for the marker
+   */
+  label : Label
 }
 
 export interface MapBoxProperties {
@@ -140,7 +219,7 @@ export interface MapBoxProperties {
    * Map style options
    */
   mapStyle: MapStyle;
-  
+
   /**
    * Map View Controller style
    */
