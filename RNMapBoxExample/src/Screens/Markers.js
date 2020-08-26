@@ -12,7 +12,24 @@ const marker1 = {
   lng: 174.7633,
   title: 'Custom',
   subtitle: 'Sub1',
-  icon: Image.resolveAssetSource(bus),
+  icon: {...Image.resolveAssetSource(bus), scale: 2.25},
+  label: {
+    labelText: '27W',
+    color: '#00AD16',
+    textSize: 11,
+    frame: {
+      x: 10,
+      y: 27,
+      width: 25,
+      height: 14,
+    },
+    backgroundColor: '#00AD16',
+    border: {
+      color: '#00AD16',
+      width: 0.05,
+      cornerRadius: 5.0,
+    },
+  },
 };
 
 const marker2 = {
@@ -21,9 +38,26 @@ const marker2 = {
   lng: 175.2793,
   title: 'Custom2',
   subtitle: 'Sub2',
-  icon: Image.resolveAssetSource(train),
+  icon: Image.resolveAssetSource(bus),
   pulsator: {
     color: '#3089d3',
+  },
+  label: {
+    labelText: '27W',
+    color: '#00AD16',
+    textSize: 11,
+    frame: {
+      x: 10,
+      y: 27,
+      width: 25,
+      height: 14,
+    },
+    backgroundColor: '#00AD16',
+    border: {
+      color: '#00AD16',
+      width: 0.05,
+      cornerRadius: 5.0,
+    },
   },
 };
 
@@ -83,11 +117,12 @@ export default class Markers extends React.Component {
             lng: marker.lng + 0.01,
             title: 'Custom',
             subtitle: 'Sub1',
-            icon: Image.resolveAssetSource(train),
+            icon: Image.resolveAssetSource(bus),
             pulsator: {
               color: '#3089d3',
             },
           },
+          marker1,
           marker3,
           marker4,
           marker5,

@@ -19,32 +19,33 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.Circle;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
-import com.mapbox.mapboxsdk.plugins.annotation.FillManager;
-import com.mapbox.mapboxsdk.plugins.annotation.LineManager;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import biz.aliustaoglu.mapbox.Utility.AssetsUtility;
 import biz.aliustaoglu.mapbox.Utility.BitmapDownloader;
 import biz.aliustaoglu.mapbox.Utility.OnAsyncTaskListener;
 
 public class RNMBMarkers {
-    ReadableArray markers;
+    final ReadableArray markers;
     MapboxMap mapboxMap;
     SymbolManager symbolManager;
     CircleManager pulsatorManager;
     CircleManager circleManager;
-    FillManager fillManager;
-    LineManager lineManager;
+
+    private static final String COLOR_BLACK = "#140e26";
+    private static final float NORMAL_TEXT_SIZE = 14f;
 
     Context context;
     Style style;
 
-    JsonParser parser = new JsonParser();
+    final JsonParser parser = new JsonParser();
 
     public RNMBMarkers(ReadableArray markers) {
         this.markers = markers;
@@ -55,17 +56,14 @@ public class RNMBMarkers {
         this.symbolManager = mapBoxMapView.symbolManager;
         this.pulsatorManager = mapBoxMapView.pulsatorManager;
         this.circleManager = mapBoxMapView.circleManager;
-        this.lineManager = mapBoxMapView.lineManager;
-        this.fillManager = mapBoxMapView.fillManager;
         this.context = mapBoxMapView.getContext();
         this.style = mapBoxMapView.style;
-
 
         List<String> markerIDs = getMarkerIDs();
 
         for (int i = 0; i < markers.size(); i++) {
             ReadableMap marker = markers.getMap(i);
-            String markerID = marker.getString("id");
+            String markerID = Objects.requireNonNull(marker).getString("id");
             markerIDs.remove(markerID);
             setMarker(marker);
             setPulsator(marker);
@@ -81,11 +79,11 @@ public class RNMBMarkers {
 
         List<String> symbolIDs = new ArrayList<>();
         for (int i = 0; i < symbolArray.size(); i++) {
-            String s = symbolArray.valueAt(i).getData().getAsJsonObject().get("id").getAsString();
+            String s = Objects.requireNonNull(symbolArray.valueAt(i).getData()).getAsJsonObject().get("id").getAsString();
             symbolIDs.add(s);
         }
         for (int i = 0; i < circleArray.size(); i++) {
-            String s = circleArray.valueAt(i).getData().getAsJsonObject().get("id").getAsString();
+            String s = Objects.requireNonNull(circleArray.valueAt(i).getData()).getAsJsonObject().get("id").getAsString();
             symbolIDs.add(s);
         }
         return symbolIDs;
@@ -93,19 +91,17 @@ public class RNMBMarkers {
 
     private void setPulsator(ReadableMap marker) {
         final String id = marker.getString("id");
-        final Double lat = marker.getDouble("lat");
-        final Double lng = marker.getDouble("lng");
-        final Boolean canPulse = marker.hasKey("pulsator");
+        final double lat = marker.getDouble("lat");
+        final double lng = marker.getDouble("lng");
+        final boolean canPulse = marker.hasKey("pulsator");
         final ReadableMap pulsator = canPulse ? marker.getMap("pulsator") : null;
 
         if (!canPulse) return;
 
-        float circleRadius = pulsator != null && pulsator.hasKey("radius") ? (float) pulsator.getDouble("radius") : 20f;
-
         Circle currentPulsator = null;
         LongSparseArray<Circle> pulsators = this.pulsatorManager.getAnnotations();
         for (int i = 0; i < pulsators.size(); i++) {
-            String pulsatorId = pulsators.valueAt(i).getData().getAsJsonObject().get("id").getAsString();
+            String pulsatorId = Objects.requireNonNull(pulsators.valueAt(i).getData()).getAsJsonObject().get("id").getAsString();
             if (pulsatorId.equals(id)) {
                 currentPulsator = pulsators.valueAt(i);
                 break;
@@ -114,12 +110,12 @@ public class RNMBMarkers {
         if (currentPulsator == null) {
             JsonElement pulsatorData = parser.parse("{\"id\":\"" + id + "\"}");
             CircleOptions pulsatorOptions = new CircleOptions()
-                    .withGeometry(Point.fromLngLat(lng, lat))
-                    .withData(pulsatorData)
-                    .withCircleOpacity(0.3f)
-                    .withCircleBlur(0.1f);
+                .withGeometry(Point.fromLngLat(lng, lat))
+                .withData(pulsatorData)
+                .withCircleOpacity(0.3f)
+                .withCircleBlur(0.1f);
 
-            if (pulsator.hasKey("color"))
+            if (Objects.requireNonNull(pulsator).hasKey("color"))
                 pulsatorOptions = pulsatorOptions.withCircleColor(pulsator.getString("color"));
 
 
@@ -134,7 +130,7 @@ public class RNMBMarkers {
             pulseAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    Float val = Float.valueOf((float) animation.getAnimatedValue());
+                    Float val = (float) animation.getAnimatedValue();
                     pulsatorCircle.setCircleRadius(val);
                     pulsatorManager.update(pulsatorCircle);
                 }
@@ -156,14 +152,16 @@ public class RNMBMarkers {
         for (int i = 0; i < markerIDs.size(); i++) {
             for (int j = 0; j < symbols.size(); j++) {
                 Symbol symbol = symbols.get(symbols.keyAt(0));
-                String id = symbol.getData().getAsJsonObject().get("id").getAsString();
+                assert symbol != null;
+                String id = Objects.requireNonNull(symbol.getData()).getAsJsonObject().get("id").getAsString();
                 if (id.equals(markerIDs.get(i))) {
                     this.symbolManager.delete(symbol);
                 }
             }
             for (int j = 0; j < circles.size(); j++) {
                 Circle circle = circles.get(circles.keyAt(0));
-                String id = circle.getData().getAsJsonObject().get("id").getAsString();
+                assert circle != null;
+                String id = Objects.requireNonNull(circle.getData()).getAsJsonObject().get("id").getAsString();
                 if (id.equals(markerIDs.get(i))) {
                     this.circleManager.delete(circle);
                 }
@@ -177,7 +175,8 @@ public class RNMBMarkers {
         for (int i = 0; i < symbolIDs.size(); i++) {
             for (int j = 0; j < pulsators.size(); j++) {
                 Circle circle = pulsators.get(pulsators.keyAt(j));
-                String id = circle.getData().getAsJsonObject().get("id").getAsString();
+                assert circle != null;
+                String id = Objects.requireNonNull(circle.getData()).getAsJsonObject().get("id").getAsString();
                 if (id.equals(symbolIDs.get(i))) {
                     this.pulsatorManager.delete(circle);
                 }
@@ -192,24 +191,22 @@ public class RNMBMarkers {
      */
     private void setMarker(ReadableMap marker) {
         final String id = marker.getString("id");
-        final Double lat = marker.getDouble("lat");
-        final Double lng = marker.getDouble("lng");
-        final String title = marker.hasKey("title") ? marker.getString("title") : "";
-        final String subtitle = marker.hasKey("subtitle") ? marker.getString("subtitle") : "";
-        final String strIcon = marker.hasKey("icon") ? marker.getMap("icon").getString("uri") : null;
-        final Float scale = marker.hasKey("icon") ? (float) marker.getMap("icon").getDouble("scale") : 1f;
-        final Boolean canPulse = marker.hasKey("pulsator");
-        final ReadableMap pulsator = canPulse ? marker.getMap("pulsator") : null;
+        final double lat = marker.getDouble("lat");
+        final double lng = marker.getDouble("lng");
+        final String strIcon = marker.hasKey("icon") ? Objects.requireNonNull(marker.getMap("icon")).getString("uri") : null;
+        final float scale = marker.hasKey("icon") ? (float) Objects.requireNonNull(marker.getMap("icon")).getDouble("scale") : 1f;
+
+        final Map labelProperties = marker.hasKey("label") ? Objects.requireNonNull(marker.getMap("label")).toHashMap() : null;
 
         final LatLng latLng = new LatLng(lat, lng);
 
         final Float[] iconOffset = marker.hasKey("centerOffset") ?
-                new Float[]{(float) marker.getArray("centerOffset").getDouble(0), (float) marker.getArray("centerOffset").getDouble(1)}
-                : new Float[]{0f, 0f};
+            new Float[]{(float) Objects.requireNonNull(marker.getArray("centerOffset")).getDouble(0), (float) Objects.requireNonNull(marker.getArray("centerOffset")).getDouble(1)}
+            : new Float[]{0f, 0f};
 
         // Default icons
         if (strIcon == null) {
-            if (marker.hasKey("circle")) setCircleIcon(marker.getMap("circle"), id, latLng, title);
+            if (marker.hasKey("circle")) setCircleIcon(marker.getMap("circle"), id, latLng);
         }
         // Debug
         else if (strIcon.startsWith("http")) {
@@ -217,7 +214,7 @@ public class RNMBMarkers {
             BitmapDownloader bd = new BitmapDownloader(new OnAsyncTaskListener<Bitmap>() {
                 @Override
                 public void onAsyncTaskSuccess(Bitmap bm) {
-                    setSymbolIcon(id, strIcon, bm, latLng, title, 2f / scale, pulsator, iconOffset);
+                    setSymbolIcon(id, strIcon, bm, latLng, 2f/scale, iconOffset, labelProperties);
                 }
 
                 @Override
@@ -231,34 +228,32 @@ public class RNMBMarkers {
             AssetsUtility assetsUtility = new AssetsUtility(this.context);
             int resourceId = assetsUtility.getAssetFromResource(strIcon);
             Bitmap bm = BitmapFactory.decodeResource(this.context.getResources(), resourceId);
-            setSymbolIcon(id, strIcon, bm, latLng, title, 1f / scale, pulsator, iconOffset);
+            setSymbolIcon(id, strIcon, bm, latLng, 1f/scale, iconOffset, labelProperties);
         }
     }
 
 
     /**
      * Set symbol icon for annotation. Before creating a new one first check if symbol exits. If so update the existing one
-     *
-     * @param id         Marker id - comes from props
+     *  @param id         Marker id - comes from props
      * @param iconName   Icon name
      * @param bm         Bitmap object
      * @param latLng     Latitude and longitude - comes from props
-     * @param label      Title - comes from props
      * @param iconSize   - icon size
      * @param iconOffset - icon offset
+     * @param labelProperties - label properties
      */
-    private void setSymbolIcon(String id, String iconName, Bitmap bm, LatLng latLng, String label, Float iconSize, ReadableMap pulsator, Float[] iconOffset) {
-        this.mapboxMap.getStyle().addImage(iconName, bm);
+    private void setSymbolIcon(String id, String iconName, Bitmap bm, LatLng latLng, Float iconSize, Float[] iconOffset, Map labelProperties) {
+        Objects.requireNonNull(this.mapboxMap.getStyle()).addImage(iconName, bm);
         LongSparseArray<Symbol> annotations = this.symbolManager.getAnnotations();
-        Boolean hasSymbol = false;
-
+        boolean hasSymbol = false;
 
         Symbol currentAnnotation = null;
 
         for (int i = 0; i < annotations.size(); i++) {
             JsonObject data = (JsonObject) annotations.valueAt(i).getData();
             currentAnnotation = annotations.valueAt(i);
-            if (data.get("id").getAsString().equals(id)) {
+            if (Objects.requireNonNull(data).get("id").getAsString().equals(id)) {
                 hasSymbol = true;
                 break;
             }
@@ -266,37 +261,37 @@ public class RNMBMarkers {
 
         if (!hasSymbol) {
             JsonElement symbolData = parser.parse("{\"id\":\"" + id + "\"}");
-            Symbol symbol = this.symbolManager.create(new SymbolOptions()
-                    .withLatLng(latLng)
-                    .withIconImage(iconName)
-                    .withIconSize(iconSize)
-                    .withData(symbolData)
-                    .withIconOffset(iconOffset)
-            );
 
+            SymbolOptions options = new SymbolOptions().withLatLng(latLng)
+                .withIconImage(iconName)
+                .withIconSize(iconSize)
+                .withData(symbolData)
+                .withIconOffset(iconOffset);
+
+            if (labelProperties != null) {
+                options.withTextField(labelProperties.containsKey("labelText") ? labelProperties.get("labelText").toString() : "");
+                options.withTextColor(labelProperties.containsKey("color") ? labelProperties.get("color").toString() : COLOR_BLACK);
+                options.withTextSize(labelProperties.containsKey("textSize") ? new Float(labelProperties.get("textSize").toString()) : NORMAL_TEXT_SIZE);
+                options.withTextOffset(new Float[]{0f, 1.25f});
+                options.withTextFont(new String[]{"Open Sans Bold", "Arial Unicode MS Bold"});
+            }
+            symbolManager.create(options);
 
         } else {
             currentAnnotation.setLatLng(latLng);
-            currentAnnotation.setIconImage(iconName);
-            currentAnnotation.setIconSize(iconSize);
-            currentAnnotation.setTextField(label);
-
-
             symbolManager.update(currentAnnotation);
         }
-
-
     }
 
-    private void setCircleIcon(ReadableMap circle, String id, LatLng latLng, String title) {
+    private void setCircleIcon(ReadableMap circle, String id, LatLng latLng) {
         LongSparseArray<Circle> circleAnnotations = this.circleManager.getAnnotations();
-        Boolean hasSymbol = false;
+        boolean hasSymbol = false;
         Circle currentCircle = null;
 
         for (int i = 0; i < circleAnnotations.size(); i++) {
             JsonObject data = (JsonObject) circleAnnotations.valueAt(i).getData();
             currentCircle = circleAnnotations.valueAt(i);
-            if (data.get("id").getAsString().equals(id)) {
+            if (Objects.requireNonNull(data).get("id").getAsString().equals(id)) {
                 hasSymbol = true;
                 break;
             }
@@ -305,8 +300,8 @@ public class RNMBMarkers {
         if (!hasSymbol) {
             JsonElement circleData = parser.parse("{\"id\":\"" + id + "\"}");
             CircleOptions circleOptions = new CircleOptions()
-                    .withLatLng(latLng)
-                    .withData(circleData);
+                .withLatLng(latLng)
+                .withData(circleData);
             if (circle.hasKey("color"))
                 circleOptions = circleOptions.withCircleColor(circle.getString("color"));
             if (circle.hasKey("radius"))
