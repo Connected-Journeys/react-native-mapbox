@@ -272,7 +272,7 @@ public class RNMBMarkers {
                 options.withTextField(labelProperties.containsKey("labelText") ? labelProperties.get("labelText").toString() : "");
                 options.withTextColor(labelProperties.containsKey("color") ? labelProperties.get("color").toString() : COLOR_BLACK);
                 options.withTextSize(labelProperties.containsKey("textSize") ? new Float(labelProperties.get("textSize").toString()) : NORMAL_TEXT_SIZE);
-                options.withTextOffset(new Float[]{0f, 1.25f});
+                options.withTextOffset(new Float[]{0f, 1.15f});
                 options.withTextFont(new String[]{"Open Sans Bold", "Arial Unicode MS Bold"});
             }
             symbolManager.create(options);
@@ -281,6 +281,8 @@ public class RNMBMarkers {
             currentAnnotation.setLatLng(latLng);
             symbolManager.update(currentAnnotation);
         }
+        symbolManager.setIconAllowOverlap(true);
+        symbolManager.setIconIgnorePlacement(true);
     }
 
     private void setCircleIcon(ReadableMap circle, String id, LatLng latLng) {
