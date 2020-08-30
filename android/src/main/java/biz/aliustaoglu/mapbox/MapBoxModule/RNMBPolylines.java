@@ -18,6 +18,7 @@ public class RNMBPolylines {
 
     ReadableArray polylines;
     String prefix = "RNMB";
+    private static final String MARKERS_LAYER_ID = "com.mapbox.annotations.points";
 
     public RNMBPolylines(ReadableArray polylines) {
         this.polylines = polylines;
@@ -61,12 +62,12 @@ public class RNMBPolylines {
             GeoJsonSource source = (GeoJsonSource) style.getSource(sourceIDs.get(i));
             // Empty feature
             source.setGeoJson("{\n" +
-                    "  \"type\": \"Feature\",\n" +
-                    "  \"geometry\": {\n" +
-                    "    \"type\": \"LineString\",\n" +
-                    "    \"coordinates\": []\n" +
-                    "  }\n" +
-                    "}");
+                "  \"type\": \"Feature\",\n" +
+                "  \"geometry\": {\n" +
+                "    \"type\": \"LineString\",\n" +
+                "    \"coordinates\": []\n" +
+                "  }\n" +
+                "}");
         }
     }
 
@@ -97,7 +98,7 @@ public class RNMBPolylines {
         PropertyValue<?>[] propertyValues = getPropertyValues(properties);
 
         LineLayer lineLayer = new LineLayer(lineId, sourceId).withProperties(propertyValues);
-        style.addLayer(lineLayer);
+        style.addLayerBelow(lineLayer, MARKERS_LAYER_ID);
     }
 
     /**
