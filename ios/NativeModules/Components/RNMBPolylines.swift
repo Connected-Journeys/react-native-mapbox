@@ -14,12 +14,12 @@ class RNMBPolylines {
     let oldPolylines: NSArray!
     var mapView: MGLMapView!
     var removedIDs: [String] = []
-    
-    
+
+
     init(_ polylines: NSArray, _ oldValue: NSArray) {
         self.polylines = polylines
         self.oldPolylines = oldValue
-        
+
         // Detect removed polylines(from props) and clear them off the map too
         oldPolylines.forEach { oldPoly in
             let oldDic = oldPoly as! NSDictionary
@@ -34,26 +34,26 @@ class RNMBPolylines {
             }
         }
     }
-    
+
     public func update(_ mapView: MGLMapView){
         self.mapView = mapView
         guard let style = self.mapView.style else { return }
-        
-        
+
+
         self.polylines.forEach{ p in
-            
-            
+
+
             let polyline = p as! NSDictionary
             let properties = polyline.object(forKey: "properties") as! NSDictionary
             let id = properties.object(forKey: "id") as! String
             let jsonData = try? JSONSerialization.data(withJSONObject: polyline, options: [])
-            
+
             let countCoords = ((polyline.object(forKey: "geometry") as? NSDictionary)?.object(forKey: "coordinates") as? NSArray)?.count ?? 0
             print(countCoords)
-            
+
             if (countCoords>0) {
                 let shapeFromGeoJSON = try? MGLShape(data: jsonData!, encoding: String.Encoding.utf8.rawValue)
-                
+
                 if (shapeFromGeoJSON != nil) {
                     if let existingSource = style.source(withIdentifier: "RNMB-shape-\(id)") as? MGLShapeSource {
                         existingSource.shape = shapeFromGeoJSON
@@ -64,14 +64,14 @@ class RNMBPolylines {
                     }
                 }
             }
-            
-            
+
+
         }
-        
+
         // Remove layers (if removed from props)
         removeLayers(style)
     }
-    
+
     private func removeLayers(_ style: MGLStyle){
         self.removedIDs.forEach{ id in
             if let existingSource = style.source(withIdentifier: "RNMB-shape-\(id)") as? MGLShapeSource {
@@ -80,7 +80,7 @@ class RNMBPolylines {
         }
         self.removedIDs = []
     }
-    
+
     private func addLayer(_ id: String, _ dict: NSDictionary, _ properties: NSDictionary, _ source: MGLShapeSource){
         let style = self.mapView.style
         let layer = MGLLineStyleLayer(identifier: "polyline\(id)", source: source)
@@ -91,13 +91,18 @@ class RNMBPolylines {
                 layer.lineDashPattern = NSExpression(forConstantValue: [0.75, 0.75])
             }
         }
-        
+
         layer.lineWidth = NSExpression(forConstantValue: width)
         layer.lineColor = NSExpression(forConstantValue: hexStringToUIColor(hex: color) )
-        
-        style?.addLayer(layer)
-        
+
+        //style?.addLayer(layer)
+        for layer in style!.layers.reversed() {
+            if !(layer is MGLSymbolStyleLayer) {
+                style?.insertLayer(lineLayer, above: layer)
+                break
+            }
+        }
     }
-    
-    
+
+
 }

@@ -272,7 +272,11 @@ public class RNMBMarkers {
                 options.withTextField(labelProperties.containsKey("labelText") ? labelProperties.get("labelText").toString() : "");
                 options.withTextColor(labelProperties.containsKey("color") ? labelProperties.get("color").toString() : COLOR_BLACK);
                 options.withTextSize(labelProperties.containsKey("textSize") ? new Float(labelProperties.get("textSize").toString()) : NORMAL_TEXT_SIZE);
-                options.withTextOffset(new Float[]{0f, 1.15f});
+                if(labelProperties.containsKey("frame")) {
+                    float labelPositionX = ((Map)labelProperties.get("frame")).containsKey("x") ?  new Float(((Map)labelProperties.get("frame")).get("x").toString()) : 0f;
+                    float labelPositionY = ((Map)labelProperties.get("frame")).containsKey("y") ?  new Float(((Map)labelProperties.get("frame")).get("y").toString()) : 0f;
+                    options.withTextOffset(new Float[]{labelPositionX, labelPositionY});
+                }
                 options.withTextFont(new String[]{"Open Sans Bold", "Arial Unicode MS Bold"});
             }
             symbolManager.create(options);

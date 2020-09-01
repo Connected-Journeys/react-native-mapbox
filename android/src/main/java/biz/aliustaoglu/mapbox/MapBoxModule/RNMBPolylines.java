@@ -18,7 +18,7 @@ public class RNMBPolylines {
 
     ReadableArray polylines;
     String prefix = "RNMB";
-    private static final String MARKERS_LAYER_ID = "com.mapbox.annotations.points";
+    private static final String ROAD_LABEL_LAYER_ID = "road-label";
 
     public RNMBPolylines(ReadableArray polylines) {
         this.polylines = polylines;
@@ -98,7 +98,7 @@ public class RNMBPolylines {
         PropertyValue<?>[] propertyValues = getPropertyValues(properties);
 
         LineLayer lineLayer = new LineLayer(lineId, sourceId).withProperties(propertyValues);
-        style.addLayerBelow(lineLayer, MARKERS_LAYER_ID);
+        style.addLayerBelow(lineLayer, ROAD_LABEL_LAYER_ID);
     }
 
     /**
@@ -107,7 +107,7 @@ public class RNMBPolylines {
      * @return Property values
      */
     private PropertyValue<?>[] getPropertyValues(ReadableMap properties) {
-        List<PropertyValue<?>> propertyValues = new ArrayList<PropertyValue<?>>();
+        List<PropertyValue<?>> propertyValues = new ArrayList<>();
 
         propertyValues.add(PropertyFactory.lineJoin(Property.LINE_JOIN_MITER));
         if (properties.hasKey("lineWidth"))
@@ -120,8 +120,7 @@ public class RNMBPolylines {
             }
         }
 
-        PropertyValue<?>[] argsPropertyValues = propertyValues.toArray(new PropertyValue<?>[propertyValues.size()]);
-        return argsPropertyValues;
+        return propertyValues.toArray(new PropertyValue<?>[propertyValues.size()]);
     }
 
     // ReadableMap.toString() adds an extra string. Remove it and get bare json.
@@ -132,7 +131,4 @@ public class RNMBPolylines {
         return json;
     }
 
-    private String getJSON(ReadableArray readableArray) {
-        return polylines.toString();
-    }
 }
