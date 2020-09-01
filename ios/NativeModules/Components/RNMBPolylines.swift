@@ -83,17 +83,17 @@ class RNMBPolylines {
 
     private func addLayer(_ id: String, _ dict: NSDictionary, _ properties: NSDictionary, _ source: MGLShapeSource){
         let style = self.mapView.style
-        let layer = MGLLineStyleLayer(identifier: "polyline\(id)", source: source)
+        let lineLayer = MGLLineStyleLayer(identifier: "polyline\(id)", source: source)
         let color = properties.object(forKey: "lineColor") as? String ?? "#336cca"
         let width = properties.object(forKey: "lineWidth") as? Float ?? 1.0
         if let pattern = properties.object(forKey: "lineType") {
             if (pattern as! String) == "dash" {
-                layer.lineDashPattern = NSExpression(forConstantValue: [0.75, 0.75])
+                lineLayer.lineDashPattern = NSExpression(forConstantValue: [0.75, 0.75])
             }
         }
 
-        layer.lineWidth = NSExpression(forConstantValue: width)
-        layer.lineColor = NSExpression(forConstantValue: hexStringToUIColor(hex: color) )
+        lineLayer.lineWidth = NSExpression(forConstantValue: width)
+        lineLayer.lineColor = NSExpression(forConstantValue: hexStringToUIColor(hex: color) )
 
         //style?.addLayer(layer)
         for layer in style!.layers.reversed() {
